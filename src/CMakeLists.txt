@@ -25,7 +25,7 @@ set(GLCPP_SRC
 )
 
 add_library(glcpp STATIC ${GLCPP_SRC})
-target_compile_options(glcpp PRIVATE -Wall -Werror -std=c++17)
+target_compile_options(glcpp PRIVATE -Wall -Werror -std=c++17 -O3)
 
 set(LIBs STB_IMAGE assimp imgui glad nfd jsoncpp_static)
 
@@ -53,7 +53,7 @@ add_executable(pixel3D
 ./scene/scene1.hpp
 )
 
-target_compile_options(pixel3D  PRIVATE -Wall -Werror -std=c++17)
+target_compile_options(pixel3D  PRIVATE -Wall -Werror -std=c++17 -O3)
 target_include_directories(pixel3D  PUBLIC ./)
 if(WIN32)
     target_link_libraries(pixel3D  glcpp -static)
