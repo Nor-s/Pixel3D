@@ -27,7 +27,7 @@ private:
 
 public:
     virtual ~Pixel3D()
-    {       
+    {
         scenes_.clear();
         imgui_.reset();
     }
@@ -36,7 +36,8 @@ public:
         stbi_set_flip_vertically_on_load(true);
         init_window(width, height, title);
         init_ui();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++)
+        {
             scenes_.emplace_back(new Scene1(width, height));
         }
     }
@@ -77,7 +78,8 @@ public:
             //  std::cout<<"\n"; // or //std::endl or // std::cout<<" "; fflush(stdout)
             delta_frame_ = current_time - last_frame_;
             last_frame_ = current_time;
-            for (auto& scene : scenes_) {
+            for (auto &scene : scenes_)
+            {
                 scene->set_delta_time(delta_frame_);
             }
 
@@ -88,19 +90,22 @@ public:
                 imgui_->begin();
                 imgui_->draw_dock();
                 int idx = 1;
-                for (auto& scene : scenes_) {
-                    scene->pre_draw();   
+                for (auto &scene : scenes_)
+                {
+                    scene->pre_draw();
                     imgui_->draw_scene("scene" + std::to_string(idx), scene.get());
                     idx++;
                 }
-                
-                for (size_t i = 0; scenes_.size() > i; i++) {
-                    if (imgui_->is_window_hovered("scene" + std::to_string(i + 1))) {
+
+                for (size_t i = 0; scenes_.size() > i; i++)
+                {
+                    if (imgui_->is_window_hovered("scene" + std::to_string(i + 1)))
+                    {
                         current_scene_idx_ = i;
-                    }                        
+                    }
                 }
 
-                imgui_->draw_property(scenes_[current_scene_idx_].get());         
+                imgui_->draw_property(scenes_[current_scene_idx_].get());
                 imgui_->draw_animation_bar(scenes_, scenes_[current_scene_idx_].get());
                 imgui_->show_status(fps_);
 
@@ -113,9 +118,8 @@ public:
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, window_->get_width(), window_->get_height());
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);        
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     }
     void post_draw()
     {

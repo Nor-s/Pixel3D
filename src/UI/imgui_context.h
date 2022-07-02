@@ -33,34 +33,35 @@
 
 struct GLFWwindow;
 
-static void executeProcess(const char *process_name, std::string arg, std::atomic<bool>& done)
+static void executeProcess(const char *process_name, std::string arg, std::atomic<bool> &done)
 {
-#ifndef NDEBUG    
+#ifndef NDEBUG
     std::cout << "begin: executeProcess-----------------\n";
 #endif
     std::filesystem::path process = std::filesystem::u8path(process_name);
     std::string abs_process = std::filesystem::absolute(process).string();
-#ifdef _WIN32    
+#ifdef _WIN32
     abs_process += ".exe";
-#endif   
-    abs_process += " " + arg;   
-    try {
+#endif
+    abs_process += " " + arg;
+    try
+    {
         system(abs_process.c_str());
-#ifndef NDEBUG    
+#ifndef NDEBUG
         std::cout << "end: executeProcess-----------------" << std::endl;
 #endif
         done = true;
     }
-    catch (std::exception& e) {
-#ifndef NDEBUG    
+    catch (std::exception &e)
+    {
+#ifndef NDEBUG
 
-        std::cout << e.what()<<std::endl;
+        std::cout << e.what() << std::endl;
 #endif
 
         done = true;
     }
 }
-
 
 namespace ui
 {
@@ -98,7 +99,7 @@ namespace ui
         void init(GLFWwindow *window)
         {
             NFD_Init();
-            const char *glsl_version = "#version 430";
+            const char *glsl_version = "#version 330";
 
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
@@ -280,7 +281,7 @@ namespace ui
             }
             ImGui::End();
         }
-        void draw_animation_bar(std::vector<std::shared_ptr<Scene>> & scenes, Scene *scene)
+        void draw_animation_bar(std::vector<std::shared_ptr<Scene>> &scenes, Scene *scene)
         {
             static bool is_hovered_animation_zoom_slider = false;
             static bool m_pTransformOpen = true;
@@ -290,14 +291,14 @@ namespace ui
             static glcpp::Bone *clicked_bone = nullptr;
             static bool is_load_animation = false;
             glcpp::Animator *animator = scene->get_mutable_animator();
-            bool &is_stop= animator->get_mutable_is_stop();
+            bool &is_stop = animator->get_mutable_is_stop();
             std::vector<const char *> animation_items = animator->get_animation_name_list();
             bool is_json = (animator->get_mutable_current_animation()->get_type() == glcpp::AnimationType::Json);
             uint32_t currentFrame = animator->get_current_frame_num();
             uint32_t beforeFrame = currentFrame;
             uint32_t startFrame = 0;
             uint32_t endFrame = animator->get_custom_duration();
-            float& fps = animator->get_mutable_fps();
+            float &fps = animator->get_mutable_fps();
             float &tick_per_second = animator->get_mutable_custom_tick_per_second();
             std::vector<uint32_t> keys = {0, 0, 10, 24};
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_AlwaysAutoResize;
@@ -307,9 +308,11 @@ namespace ui
             }
             try
             {
-                ImGui::Begin("Animation bar", NULL, window_flags);                
-                if (ImGui::Button("All play")) {
-                    for (auto& scene : scenes) {
+                ImGui::Begin("Animation bar", NULL, window_flags);
+                if (ImGui::Button("All play"))
+                {
+                    for (auto &scene : scenes)
+                    {
                         scene->get_mutable_animator()->get_mutable_is_stop() = false;
 
                         scene->get_mutable_animator()->set_current_frame_num_to_time(0);
@@ -318,19 +321,18 @@ namespace ui
                 ImGui::SameLine();
                 if (ImGui::Button("play"))
                 {
-                    is_stop= false;
+                    is_stop = false;
                     currentFrame = 0;
                 }
                 ImGui::SameLine();
 
                 if (ImGui::Button("stop"))
                 {
-                    is_stop= true;
+                    is_stop = true;
                 }
                 ImGui::SameLine();
                 bool *p_is_loop = animator->get_mutable_pointer_is_loop();
                 ImGui::Checkbox("loop", p_is_loop);
-                
 
                 ImGui::SameLine();
                 if (ImGui::Button("load animation") && !is_load_animation)
@@ -364,8 +366,8 @@ namespace ui
 
                 if (ImGui::Button("export: gltf"))
                 {
-                    nfdchar_t* out_path;
-                    nfdfilteritem_t filter_item[1] = { {"anim", "gltf"} };
+                    nfdchar_t *out_path;
+                    nfdfilteritem_t filter_item[1] = {{"anim", "gltf"}};
                     nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, NULL, "anim.gltf");
 
                     if (result == NFD_OKAY)
@@ -544,7 +546,6 @@ namespace ui
         {
             static int count = 0;
 
-
             // render your GUI
             ImGui::Begin("Model Property");
             {
@@ -631,7 +632,7 @@ namespace ui
             {
                 const float PAD = 0.0f;
                 const float PADX = 120.0f;
-                const ImGuiViewport* viewport = ImGui::GetMainViewport();
+                const ImGuiViewport *viewport = ImGui::GetMainViewport();
                 ImVec2 work_pos = viewport->WorkPos; // Use work area to avoid menu-bar/task-bar, if any!
                 ImVec2 work_size = viewport->WorkSize;
                 ImVec2 window_pos, window_pos_pivot;
@@ -643,7 +644,7 @@ namespace ui
                 ImGui::SetNextWindowViewport(viewport->ID);
                 flags |= ImGuiWindowFlags_NoMove;
             }
-        //    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+            //    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
             // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
             // Based on your use case you may want one of the other.
@@ -846,9 +847,10 @@ namespace ui
             std::cout << "click btn\n";
 #endif
             if (atomic_for_process_open_)
-            {  
+            {
                 atomic_for_process_open_ = false;
-                if (thread_for_process_open_.joinable()) {
+                if (thread_for_process_open_.joinable())
+                {
 #ifndef NDEBUG
                     std::cout << "begin: thread.join\n";
 #endif
@@ -860,15 +862,16 @@ namespace ui
                 ImguiJson::ModelBindingPoseToJson("model.json", scene->get_model().get());
 
                 std::filesystem::path path_default_model = std::filesystem::u8path("model.json");
-                std::filesystem::path path_default_anim = std::filesystem::u8path( "anim.json");
+                std::filesystem::path path_default_anim = std::filesystem::u8path("anim.json");
                 std::string arg = "--arg1 " + std::filesystem::absolute(path_default_model).string() + " --arg2 " +
                                   std::filesystem::absolute(path_default_anim).string();
-               
+
                 thread_for_process_open_ = std::thread(executeProcess, process_name, arg, std::ref(atomic_for_process_open_));
 
                 return true;
             }
-            else {
+            else
+            {
 #ifndef NDEBUG
 
                 std::cout << "The process is running.\n";
