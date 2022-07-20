@@ -6,18 +6,20 @@
 #include "glcpp/animator.h"
 #include "glcpp/utility.hpp"
 #include "glcpp/importer.h"
+#include "glcpp/heightmap.h"
 
 SharedResources::SharedResources()
 {
     init_skybox();
     init_animator();
+    terra_ = std::make_shared<glcpp::Heightmap>("./resources/textures/heightmap/dem.png");
 }
 
 SharedResources::~SharedResources() = default;
 
 void SharedResources::init_skybox()
 {
-    skybox_ = std::make_unique<glcpp::Cubemap>(skybox_faces_[0],
+    skybox_ = std::make_unique<glcpp::Cubemap>(skybox_faces_[skybox_idx_],
                                                "./resources/shaders/skybox.vs",
                                                "./resources/shaders/skybox.fs");
 }
@@ -27,14 +29,25 @@ void SharedResources::init_animator()
     animator_ = std::make_unique<glcpp::Animator>();
 }
 
-glcpp::Cubemap *SharedResources::get_mutable_skybox()
+glcpp::Cubemap *SharedResources::get_mutable_skybox(uint32_t idx)
 {
+    if (idx != -1 && idx != skybox_idx_)
+    {
+        skybox_idx_ = idx;
+        skybox_ = std::make_unique<glcpp::Cubemap>(skybox_faces_[idx],
+                                                   "./resources/shaders/skybox.vs",
+                                                   "./resources/shaders/skybox.fs");
+    }
     return skybox_.get();
 }
 
 glcpp::Animator *SharedResources::get_mutable_animator()
 {
     return animator_.get();
+}
+glcpp::Heightmap *SharedResources::get_mutable_heightmap()
+{
+    return terra_.get();
 }
 std::shared_ptr<glcpp::Model> SharedResources::get_mutable_model(int idx)
 {

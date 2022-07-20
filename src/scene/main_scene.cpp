@@ -7,7 +7,8 @@
 #include <glcpp/model.h>
 #include <glcpp/animator.h>
 #include <glcpp/entity.h>
-
+#include <glcpp/heightmap.h>
+#include <glcpp/cubemap.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -38,6 +39,7 @@ void MainScene::init_shader()
     resources_->add_shader("blurred_framebuffer", "./resources/shaders/simple_framebuffer.vs", "./resources/shaders/skybox_blur.fs");
     resources_->add_shader("outline", "./resources/shaders/outline_framebuffer.vs", "./resources/shaders/outline_framebuffer.fs");
     resources_->add_shader("grid", "./resources/shaders/grid.vs", "./resources/shaders/grid.fs");
+    resources_->add_shader("height", "./resources/shaders/heightmap_cpu.vs", "./resources/shaders/heightmap_cpu.fs");
 }
 
 void MainScene::init_framebuffer(uint32_t width, uint32_t height)
@@ -110,17 +112,21 @@ void MainScene::draw_to_framebuffer()
 {
     auto grid_shader = resources_->get_mutable_shader("grid");
 
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     framebuffer_->bind_with_depth(background_color_);
     {
-        grid_shader->use();
-        grid_shader->set_mat4("view", view_);
-        grid_shader->set_mat4("projection", projection_);
+        // grid_shader->use();
+        // grid_shader->set_mat4("view", view_);
+        // grid_shader->set_mat4("projection", projection_);
 
-        grid_framebuffer_->draw(*grid_shader);
-        pixelate_framebuffer_->draw();
+        // grid_framebuffer_->draw(*grid_shader);
+        // pixelate_framebuffer_->draw();
+        resources_->get_mutable_skybox(5)->draw(view_, projection_);
+
+        resources_->get_mutable_heightmap()
+            ->draw(resources_->get_mutable_shader("height").get(), projection_, view_);
 
         //  glEnable(GL_DEPTH_TEST);
         //  selected_entity_->draw(*shader, view_, projection_);
@@ -131,10 +137,9 @@ void MainScene::draw_to_framebuffer()
     auto error = glGetError();
     if (error != GL_NO_ERROR)
     {
-        std::cout <<"main scene: " << error << std::endl;
+        std::cout << "main scene: " << error << std::endl;
     }
 #endif
-
 }
 
 void MainScene::draw()

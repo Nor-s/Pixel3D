@@ -1,14 +1,6 @@
-# **Pixel3D v0.0.5**
-
-![](./screenshot/2022-07-04.png)
+# **Terrain Generator**
 
 ## **TODO**
-
--   Fix [#6](https://github.com/Nor-s/Pixel3D/issues/6)
--   model picking
--   visualize bone
--   z oder (grid <-> model)
--   mp2mm: increased accuracy
 
 ## **build**
 
@@ -22,19 +14,6 @@
  cmake .. -G Ninja
  Ninja
 ```
-
-### mp2mm python module (mp_gui_build.yaml)
-
-```
-conda env create -f mp_gui_build.yaml
-```
-
--   pyqt5
--   mediapipe
--   pafy
--   pyglm
--   youtube-dl==2020.12.2
--   pyinstaller
 
 ## **External**
 
