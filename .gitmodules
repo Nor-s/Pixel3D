@@ -16,3 +16,6 @@
 [submodule "external/ImFileDialog"]
 	path = external/ImFileDialog
 	url = https://github.com/dfranx/ImFileDialog.git
+[submodule "procedural_3d_terrain"]
+	path = procedural_3d_terrain
+	url = https://github.com/Nor-s/procedural-3d-terrain.git
