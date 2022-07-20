@@ -12,7 +12,7 @@ SharedResources::SharedResources()
 {
     init_skybox();
     init_animator();
-    terra_ = std::make_shared<glcpp::Heightmap>("./resources/textures/heightmap/dem.png");
+    terra_ = std::make_shared<glcpp::Heightmap>("./resources/textures/heightmap/dem_4499.png");
 }
 
 SharedResources::~SharedResources() = default;

@@ -90,12 +90,7 @@ void Pixel3D::loop()
             this->draw_scene();
 
             auto entity = scenes_[current_scene_idx_]->get_mutable_selected_entity();
-
-            ui_->draw_model_properties(scenes_[current_scene_idx_].get());
-
-            ui_->draw_hierarchy_layer(entity);
-
-            ui_->draw_timeline(scenes_[current_scene_idx_].get());
+            ui_->draw_heightmap_layer(scenes_[current_scene_idx_].get());
 
             ui_->end();
         }

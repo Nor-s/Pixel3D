@@ -1,0 +1,27 @@
+#ifndef UI_HEIGHTMAP_LAYER_H
+#define UI_HEIGHTMAP_LAYER_H
+
+namespace glcpp
+{
+    class TransformComponent;
+}
+
+class Scene;
+namespace ui
+{
+    struct HeightmapContext
+    {
+    };
+    class HeightmapLayer
+    {
+    public:
+        HeightmapLayer();
+        ~HeightmapLayer();
+        void draw(Scene *scene);
+
+    private:
+        void draw_transform_slider(glcpp::TransformComponent &transform);
+    };
+}
+
+#endif

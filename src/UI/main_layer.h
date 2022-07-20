@@ -4,6 +4,7 @@
 #include "model_property_layer.h"
 #include "timeline_layer.h"
 #include "hierarchy_layer.h"
+#include "heightmap_layer.h"
 
 #include <string>
 #include <memory>
@@ -34,6 +35,7 @@ namespace ui
         MenuContext menu_context{};
         TimelineContext timeline_context{};
         PropertiesContext properties_context{};
+        HeightmapContext heightmap_context{};
     };
     /**
      * @brief dock + menu bar(import, export)
@@ -53,6 +55,7 @@ namespace ui
         void draw_model_properties(Scene *scene);
         void draw_hierarchy_layer(glcpp::Entity *entity);
         void draw_timeline(Scene *scene);
+        void draw_heightmap_layer(Scene *scene);
 
         bool is_scene_layer_hovered(const std::string &title);
 
@@ -67,6 +70,7 @@ namespace ui
         ModelPropertyLayer property_layer_{};
         TimelineLayer timeline_layer_{};
         UiContext context_{};
+        HeightmapLayer heightmap_layer_{};
     };
 }
 

@@ -63,6 +63,7 @@ add_executable(pixel3D
 ./UI/main_layer.cpp
 ./UI/imgui_helper.hpp
 ./UI/ImFileDialog.cpp
+./UI/heightmap_layer.cpp
 
 
 ./mp2mm.cpp

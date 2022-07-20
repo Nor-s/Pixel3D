@@ -23,7 +23,6 @@ namespace ui
     {
         ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void *
         {
-
             GLuint tex;
 
             glGenTextures(1, &tex);
@@ -43,7 +42,6 @@ namespace ui
         {
             GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(tex));
             glDeleteTextures(1, &texID);
-
         };
         NFD_Init();
         const char *glsl_version = "#version 330";
@@ -86,7 +84,6 @@ namespace ui
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         context_ = UiContext{};
-
     }
 
     void MainLayer::end()
@@ -154,7 +151,6 @@ namespace ui
             {
                 context_.menu_context.path = ifd::FileDialog::Instance().GetResult().u8string();
                 context_.menu_context.clicked_import_model = true;
-
             }
             ifd::FileDialog::Instance().Close();
         }
@@ -170,7 +166,6 @@ namespace ui
                 {
 
                     ifd::FileDialog::Instance().Open("Import", "import", "model {.obj,.dae,.pmx,.fbx,.md5mesh,.gltf,.json},.*");
-
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Export: animation", NULL, nullptr))
@@ -212,6 +207,10 @@ namespace ui
     void MainLayer::draw_timeline(Scene *scene)
     {
         timeline_layer_.draw(scene, context_.timeline_context);
+    }
+    void MainLayer::draw_heightmap_layer(Scene *scene)
+    {
+        heightmap_layer_.draw(scene);
     }
 
     bool MainLayer::is_scene_layer_hovered(const std::string &title)

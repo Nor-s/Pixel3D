@@ -3,11 +3,14 @@
 namespace glcpp
 {
     Heightmap::Heightmap(const char *path)
+        : heightmap_path_(path)
     {
-        set_target(path);
+        init_mesh();
+        set_rgba("./resources/textures/heightmap/00207.png");
+        // set_target(path);
         init_indices();
         init_buffers();
-        set_texture("./resources/textures/heightmap/rgba.png");
+        // set_texture("./resources/textures/heightmap/sat_4499.png");
     }
 
     Heightmap::~Heightmap()
@@ -15,6 +18,63 @@ namespace glcpp
         glDeleteVertexArrays(1, &terrain_VAO_);
         glDeleteBuffers(1, &terrain_VBO_);
         glDeleteBuffers(1, &terrain_IBO_);
+    }
+    void Heightmap::init_mesh()
+    {
+        current_vertices_.clear();
+        uv_.clear();
+        for (int i = 0; i < height_; i++)
+        {
+            for (int j = 0; j < width_; j++)
+            {
+                // vertex
+                current_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
+                current_vertices_.push_back(0);                                              // vy
+                current_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
+
+                // uv
+                uv_.push_back(j / static_cast<float>(width_));
+                uv_.push_back(i / static_cast<float>(height_));
+            }
+        }
+    }
+    void Heightmap::reload()
+    {
+        init_mesh();
+        delta_time_ = 0.0f;
+    }
+    void Heightmap::set_rgba(const char *path)
+    {
+        target_vertices_.clear();
+        std::vector<unsigned char> texture;
+
+        stbi_set_flip_vertically_on_load(true);
+        unsigned char *data = stbi_load(path, &width_, &height_, &nr_channels_, 0);
+        float yScale = (64.0f / 256.0f), yShift = 16.0f;
+        unsigned bytePerPixel = nr_channels_;
+        assert(nr_channels_ == 4);
+
+        for (int i = 0; i < height_; i++)
+        {
+            for (int j = 0; j < width_; j++)
+            {
+                unsigned char *pixelOffset = data + (j + width_ * i) * bytePerPixel;
+                unsigned char r = pixelOffset[0];
+                unsigned char g = pixelOffset[1];
+                unsigned char b = pixelOffset[2];
+                unsigned char a = pixelOffset[3];
+
+                // vertex
+                target_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
+                target_vertices_.push_back((int)a * yScale - yShift);                       // vy
+                target_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
+
+                texture.push_back(r);
+                texture.push_back(g);
+                texture.push_back(b);
+            }
+        }
+        set_texture(texture);
     }
 
     void Heightmap::set_target(const char *path)
@@ -33,7 +93,8 @@ namespace glcpp
 
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
-        float yScale = (64.0f / 256.0f) * 2.0f, yShift = 16.0f;
+        target_vertices_.clear();
+        float yScale = (64.0f / 256.0f), yShift = 16.0f;
         unsigned bytePerPixel = nr_channels_;
         for (int i = 0; i < height_; i++)
         {
@@ -46,17 +107,8 @@ namespace glcpp
                 target_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
                 target_vertices_.push_back((int)y * yScale - yShift);                       // vy
                 target_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
-
-                current_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
-                current_vertices_.push_back((int)y * (yScale / 3.0f) - yShift);              // vy
-                current_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
-
-                // uv
-                uv_.push_back(j / static_cast<float>(width_));
-                uv_.push_back(i / static_cast<float>(height_));
             }
         }
-        new_vec_ = current_vertices_;
         std::cout << "Loaded " << current_vertices_.size() / 3 << " current_vertices_" << std::endl;
         stbi_image_free(data);
     }
@@ -65,10 +117,10 @@ namespace glcpp
         for (int i = 0; i < current_vertices_.size(); i += 3)
         {
             int idx = i + 1;
-            new_vec_[idx] = (1 - y_factor) * current_vertices_[idx] + y_factor * target_vertices_[idx];
+            current_vertices_[idx] = (1 - y_factor) * current_vertices_[idx] + y_factor * target_vertices_[idx];
         }
         glBindBuffer(GL_ARRAY_BUFFER, terrain_VBO_);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, new_vec_.size() * sizeof(float), &new_vec_[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, current_vertices_.size() * sizeof(float), &current_vertices_[0]);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -123,8 +175,9 @@ namespace glcpp
 
     void Heightmap::set_texture(const char *path)
     {
-        glGenTextures(1, &texture_);
-        glBindTexture(GL_TEXTURE_2D, texture_);
+        texture_path_ = std::string(path);
+        glGenTextures(1, &texture_[current_texture_id_]);
+        glBindTexture(GL_TEXTURE_2D, texture_[current_texture_id_]);
 
         // set the texture wrapping/filtering options (on the currently bound texture object)
 
@@ -148,35 +201,70 @@ namespace glcpp
 
         stbi_image_free(data);
     }
+    void Heightmap::set_texture(std::vector<unsigned char> &tex)
+    {
+        glGenTextures(1, &texture_[current_texture_id_]);
+        glBindTexture(GL_TEXTURE_2D, texture_[current_texture_id_]);
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Use "GL_LINEAR" instead
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB, GL_UNSIGNED_BYTE, &tex[0]);
+        glGenerateMipmap(GL_TEXTURE_2D); // Remove
+    }
+
+    TransformComponent &Heightmap::get_mutable_transform()
+    {
+        return transform_component_;
+    }
+    bool &Heightmap::get_mutable_is_wireframe()
+    {
+        return is_wireframe_;
+    }
+    bool &Heightmap::get_mutable_is_greyscale()
+    {
+        return is_greyscale_;
+    }
+    float &Heightmap::get_mutable_y_scale()
+    {
+        return y_scale_factor_;
+    }
+    float &Heightmap::get_mutable_animation_speed()
+    {
+        return animation_speed_;
+    }
     void Heightmap::draw(Shader *shader, const glm::mat4 &projection, const glm::mat4 &view)
     {
-        static float factor = 0.0f;
         static float vec = 1.0f;
-        static float speed = 0.002f;
 
-        factor += vec * speed;
-
-        if (factor >= 1.0)
+        if (delta_time_ < 1.0)
         {
-            vec = -1.0f;
+            delta_time_ += vec * animation_speed_;
         }
-        else if (factor <= 0.0)
+        else
         {
-            vec = 1.0f;
+            delta_time_ = 1.0f;
         }
-        update_vert(factor);
+        update_vert(delta_time_);
         shader->use();
         shader->set_int("Texture1", 0); // or with shader class
+        shader->set_bool("IsGreyScale", is_greyscale_);
+        shader->set_float("yScale", y_scale_factor_);
 
         shader->set_mat4("projection", projection);
         shader->set_mat4("view", view);
-        glm::mat4 model = glm::mat4(1.0f);
-        shader->set_mat4("model", model);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_);
+        shader->set_mat4("model", transform_component_.get_mat4());
+        for (int i = 0; i < texture_.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, texture_[i]);
+        }
         glBindVertexArray(terrain_VAO_);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if (is_wireframe_)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
         for (unsigned int strip = 0; strip < num_strips_; strip++)
         {
             glDrawElements(GL_TRIANGLE_STRIP,                                              // primitive type
