@@ -45,14 +45,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/bin)
-if (APPLE)
-  execute_process(COMMAND sh "install_mp2mm.sh"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-else()
-  execute_process(COMMAND cmd /C install_mp2mm.bat
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-endif()
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/dist/mp2mm DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 message(STATUS "Compiler")
 message(STATUS " - ID       \t: ${CMAKE_CXX_COMPILER_ID}")
