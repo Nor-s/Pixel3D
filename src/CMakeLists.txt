@@ -71,6 +71,7 @@ add_executable(pixel3D
 ./scene/scene.hpp
 ./scene/main_scene.cpp
 ./scene/shared_resources.cpp
+./scene/redis_db.cpp
 )
 if(MSVC)
   message("------------------MSVC")
@@ -79,7 +80,7 @@ if(MSVC)
      message("--------------release")
       target_link_options(pixel3D PUBLIC "/INCREMENTAL" "/SUBSYSTEM:windows" "/ENTRY:mainCRTStartup")
   endif()
-  target_link_libraries(pixel3D  glcpp)
+  target_link_libraries(pixel3D  glcpp hiredis_static)
 elseif(WIN32)
     message("------------------GCC or...")
     target_compile_options(pixel3D  PRIVATE -Wall -Werror -std=c++17 -static)

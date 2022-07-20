@@ -1,6 +1,8 @@
 #ifndef UI_HEIGHTMAP_LAYER_H
 #define UI_HEIGHTMAP_LAYER_H
 
+#include <string>
+
 namespace glcpp
 {
     class TransformComponent;

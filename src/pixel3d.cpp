@@ -11,6 +11,8 @@
 #include "glcpp/entity.h"
 #include "glcpp/component/animation_component.h"
 #include "glcpp/exporter.h"
+#include "scene/redis_db.h"
+#include "glcpp/heightmap.h"
 
 namespace fs = std::filesystem;
 
@@ -216,6 +218,11 @@ void Pixel3D::update_resources()
     }
     if (menu_context.clicked_export_animation)
     {
+    }
+    auto redis = shared_resources_->get_mutable_redis();
+    if (redis->is_updated())
+    {
+        shared_resources_->get_mutable_heightmap()->reload();
     }
 }
 void Pixel3D::process_buttons()

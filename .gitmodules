@@ -19,3 +19,6 @@
 [submodule "procedural_3d_terrain"]
 	path = procedural_3d_terrain
 	url = https://github.com/Nor-s/procedural-3d-terrain.git
+[submodule "external/hiredis"]
+	path = external/hiredis
+	url = https://github.com/redis/hiredis.git

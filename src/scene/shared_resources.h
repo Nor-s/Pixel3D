@@ -21,6 +21,8 @@ namespace glcpp
     class Heightmap;
 }
 
+class RedisDB;
+
 class SharedResources
 {
 
@@ -30,6 +32,7 @@ public:
     glcpp::Cubemap *get_mutable_skybox(uint32_t idx = -1);
     glcpp::Animator *get_mutable_animator();
     glcpp::Heightmap *get_mutable_heightmap();
+    RedisDB *get_mutable_redis();
     std::shared_ptr<glcpp::Model> get_mutable_model(int idx);
     std::shared_ptr<glcpp::Animation> get_mutable_animation(int idx);
     std::shared_ptr<glcpp::Model> back_mutable_model();
@@ -90,6 +93,7 @@ private:
     std::vector<std::shared_ptr<glcpp::Model>> models_;
     std::vector<std::shared_ptr<glcpp::Animation>> animations_;
     std::map<std::string, std::shared_ptr<glcpp::Shader>> shaders_;
+    std::unique_ptr<RedisDB> redis_;
 
     std::shared_ptr<glcpp::Heightmap> terra_;
     uint32_t skybox_idx_ = 0u;

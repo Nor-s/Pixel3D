@@ -7,12 +7,14 @@
 #include "glcpp/utility.hpp"
 #include "glcpp/importer.h"
 #include "glcpp/heightmap.h"
+#include "redis_db.h"
 
 SharedResources::SharedResources()
 {
     init_skybox();
     init_animator();
     terra_ = std::make_shared<glcpp::Heightmap>("./resources/textures/heightmap/dem_4499.png");
+    redis_ = std::make_unique<RedisDB>();
 }
 
 SharedResources::~SharedResources() = default;
@@ -48,6 +50,11 @@ glcpp::Animator *SharedResources::get_mutable_animator()
 glcpp::Heightmap *SharedResources::get_mutable_heightmap()
 {
     return terra_.get();
+}
+
+RedisDB *SharedResources::get_mutable_redis()
+{
+    return redis_.get();
 }
 std::shared_ptr<glcpp::Model> SharedResources::get_mutable_model(int idx)
 {

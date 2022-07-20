@@ -2,20 +2,23 @@
 #include "glcpp/heightmap.h"
 #include "scene/scene.hpp"
 #include "scene/shared_resources.h"
-
 #include <imgui/imgui.h>
+#include "scene/redis_db.h"
 
 namespace ui
 {
-    HeightmapLayer::HeightmapLayer()
-    {
-    }
+    HeightmapLayer::HeightmapLayer() = default;
     HeightmapLayer::~HeightmapLayer()
     {
     }
     void HeightmapLayer::draw(Scene *scene)
     {
+        static int grid_size = 1;
+        static float alpha = 1.0f;
+
         glcpp::Heightmap *terrain = scene->get_mutable_ref_shared_resources()->get_mutable_heightmap();
+        RedisDB *redis = scene->get_mutable_ref_shared_resources()->get_mutable_redis();
+
         if (ImGui::Begin("Properties"))
         {
             if (ImGui::CollapsingHeader("Transform"))
@@ -29,38 +32,66 @@ namespace ui
                 bool greyscale = terrain->get_mutable_is_greyscale();
                 float y_scale = terrain->get_mutable_y_scale();
                 float speed = terrain->get_mutable_animation_speed();
-                ImGui::Checkbox("wireframe", &wireframe);
+                ImGui::Text("wireframe");
+                ImGui::Checkbox("##wireframe", &wireframe);
                 terrain->get_mutable_is_wireframe() = wireframe;
-
-                ImGui::Checkbox("greyscale", &greyscale);
+                ImGui::Text("greyscale");
+                ImGui::Checkbox("##greyscale", &greyscale);
                 terrain->get_mutable_is_greyscale() = greyscale;
 
-                ImGui::DragFloat("y scale", &y_scale, 0.01f, 0.0f, 0.0f);
+                ImGui::Text("y scale");
+                ImGui::DragFloat("##y scale", &y_scale, 0.01f, 0.0f, 0.0f);
                 terrain->get_mutable_y_scale() = y_scale;
 
-                ImGui::DragFloat("animation speed", &speed, 0.00001f, 0.000001f, 1.0f, "%.6f");
+                ImGui::Text("anim speed");
+                ImGui::DragFloat("##animation speed", &speed, 0.00001f, 0.000001f, 1.0f, "%.6f");
                 terrain->get_mutable_animation_speed() = speed;
 
                 if (ImGui::Button("Reload"))
                 {
-                    terrain->reload();
+                    terrain->reload_animation();
                 }
                 ImGui::Separator();
             }
             if (ImGui::CollapsingHeader("CGANs"))
             {
-                int sample_num = 1;
-                float alpha = 1.0f;
-                ImGui::InputInt("num", &sample_num);
-                ImGui::InputFloat("alpha", &alpha);
+                std::string &python_path = redis->get_mutable_python_path();
+                std::string &script_path = redis->get_mutable_script_path();
+                std::string &models_dir_path = redis->get_mutable_models_dir_path();
+
+                ImGui::Text("python path");
+                ImGui::InputText("##python path", &python_path[0], python_path.size());
+                ImGui::Text("script path");
+                ImGui::InputText("##script path", &script_path[0], script_path.size());
+                ImGui::Text("model output path");
+                ImGui::InputText("##models dir", &models_dir_path[0], models_dir_path.size());
+                ImGui::Text("grid size");
+                ImGui::InputInt("##num", &grid_size);
+                ImGui::Text("alpha");
+                ImGui::DragFloat("##alpha", &alpha, 0.001f, 0.001f, 2.0f, "%.3f");
                 if (ImGui::Button("Ursus arctos Linnaeus"))
                 {
+                    std::string command = "{ \"CGAN\": \"0\", \"alpha\":  \"" +
+                                          std::to_string(alpha) +
+                                          "\", \"label\": \"0\", \"grid_size\": \"" +
+                                          std::to_string(grid_size) + "\" }";
+                    redis->push(command);
                 }
                 if (ImGui::Button("Theropithecus gelada"))
                 {
+                    std::string command = "{ \"CGAN\": \"0\", \"alpha\":  \"" +
+                                          std::to_string(alpha) +
+                                          "\", \"label\": \"2\", \"grid_size\": \"" +
+                                          std::to_string(grid_size) + "\" }";
+                    redis->push(command);
                 }
                 if (ImGui::Button("Yucca brevifolia"))
                 {
+                    std::string command = "{ \"CGAN\": \"0\", \"alpha\":  \"" +
+                                          std::to_string(alpha) +
+                                          "\", \"label\": \"1\", \"grid_size\": \"" +
+                                          std::to_string(grid_size) + "\" }";
+                    redis->push(command);
                 }
                 ImGui::Separator();
             }

@@ -26,7 +26,6 @@ namespace glcpp
         Heightmap(const char *path);
         ~Heightmap();
         void set_rgba(const char *path);
-        void set_target(const char *path);
         void set_texture(const char *path);
 
         TransformComponent &get_mutable_transform();
@@ -36,8 +35,10 @@ namespace glcpp
         float &get_mutable_animation_speed();
         void draw(Shader *shader, const glm::mat4 &projection, const glm::mat4 &view);
         void reload();
+        void reload_animation();
 
     private:
+        void delete_buff();
         void init_mesh();
         void update_vert(float y_factor);
         void init_indices();
@@ -46,8 +47,8 @@ namespace glcpp
 
         std::string heightmap_path_;
         std::string texture_path_;
-        float animation_speed_ = 0.0001f;
-        float y_scale_factor_ = 1.0f;
+        float animation_speed_ = 0.002f;
+        float y_scale_factor_ = 2.0f;
         float delta_time_ = 0.0f;
         unsigned int current_texture_id_ = 0u;
         bool is_wireframe_ = false;
@@ -66,8 +67,8 @@ namespace glcpp
         unsigned int uv_VBO_ = 0U;
         unsigned int num_strips_ = 0;
         unsigned int num_tris_per_stripe_ = 0;
-        int width_ = 256u;
-        int height_ = 256u;
+        int width_ = 0u;
+        int height_ = 0u;
         int nr_channels_ = 0u;
         int rez_ = 1;
     };

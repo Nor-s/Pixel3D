@@ -6,7 +6,9 @@ in float Height;
 in vec2 TexCoord;
 
 uniform sampler2D Texture1;
+uniform sampler2D Texture2;
 uniform bool IsGreyScale;
+uniform float factor;
 
 void main()
 {
@@ -15,6 +17,13 @@ void main()
         FragColor = vec4(h, h, h, 1.0);
     }
     else {
-        FragColor = texture(Texture1, TexCoord);
+        if (factor >= 0.0) {
+
+            FragColor = mix(texture(Texture1, TexCoord), texture(Texture2, TexCoord), factor);
+        }
+        else {
+            FragColor = mix(texture(Texture2, TexCoord), texture(Texture1, TexCoord), -factor);
+        }
+
     }
 }

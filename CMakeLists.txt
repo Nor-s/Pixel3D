@@ -46,6 +46,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
+file(COPY result.png DESTINATION ${CMAKE_BINARY_DIR})
+
 message(STATUS "Compiler")
 message(STATUS " - ID       \t: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS " - Version  \t: ${CMAKE_CXX_COMPILER_VERSION}")
@@ -96,6 +98,7 @@ message("jsoncpp")
 add_subdirectory(external/jsoncpp)
 message("GLM")
 add_subdirectory(external/glm/)
+add_subdirectory(external/hiredis)
 
 
 add_subdirectory(src)

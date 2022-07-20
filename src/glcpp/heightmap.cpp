@@ -5,22 +5,24 @@ namespace glcpp
     Heightmap::Heightmap(const char *path)
         : heightmap_path_(path)
     {
-        init_mesh();
-        set_rgba("./resources/textures/heightmap/00207.png");
-        // set_target(path);
-        init_indices();
-        init_buffers();
-        // set_texture("./resources/textures/heightmap/sat_4499.png");
+        set_rgba("./result.png");
     }
 
     Heightmap::~Heightmap()
     {
+        delete_buff();
+    }
+
+    void Heightmap::delete_buff()
+    {
         glDeleteVertexArrays(1, &terrain_VAO_);
         glDeleteBuffers(1, &terrain_VBO_);
         glDeleteBuffers(1, &terrain_IBO_);
+        glDeleteBuffers(1, &uv_VBO_);
     }
     void Heightmap::init_mesh()
     {
+        std::cout << "INIT_MESH\n";
         current_vertices_.clear();
         uv_.clear();
         for (int i = 0; i < height_; i++)
@@ -40,34 +42,59 @@ namespace glcpp
     }
     void Heightmap::reload()
     {
+        current_vertices_ = target_vertices_;
+        set_rgba("./result.png");
+        delta_time_ = 0.0f;
+    }
+    void Heightmap::reload_animation()
+    {
         init_mesh();
         delta_time_ = 0.0f;
     }
     void Heightmap::set_rgba(const char *path)
     {
+        static unsigned int call_counter = 0u;
+        call_counter++;
+        current_texture_id_ = (current_texture_id_ + 1) % 2;
         target_vertices_.clear();
         std::vector<unsigned char> texture;
 
         stbi_set_flip_vertically_on_load(true);
-        unsigned char *data = stbi_load(path, &width_, &height_, &nr_channels_, 0);
+        int width, height;
+        unsigned char *data = stbi_load(path, &width, &height, &nr_channels_, 0);
+        bool is_updated = false;
+        if (width != width_ || height != height_)
+        {
+            std::cout << "width: " << width << " , height: " << height << " " << nr_channels_ << std::endl;
+            width_ = width;
+            height_ = height;
+            if (call_counter > 0u)
+            {
+                delete_buff();
+            }
+            init_mesh();
+            is_updated = true;
+        }
+        width_ = width;
+        height_ = height;
         float yScale = (64.0f / 256.0f), yShift = 16.0f;
         unsigned bytePerPixel = nr_channels_;
         assert(nr_channels_ == 4);
 
-        for (int i = 0; i < height_; i++)
+        for (int i = 0; i < height; i++)
         {
-            for (int j = 0; j < width_; j++)
+            for (int j = 0; j < width; j++)
             {
-                unsigned char *pixelOffset = data + (j + width_ * i) * bytePerPixel;
+                unsigned char *pixelOffset = data + (j + width * i) * bytePerPixel;
                 unsigned char r = pixelOffset[0];
                 unsigned char g = pixelOffset[1];
                 unsigned char b = pixelOffset[2];
                 unsigned char a = pixelOffset[3];
 
                 // vertex
-                target_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
-                target_vertices_.push_back((int)a * yScale - yShift);                       // vy
-                target_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
+                target_vertices_.push_back(-height / 2.0f + height * i / (float)height); // vx
+                target_vertices_.push_back((int)a * yScale - yShift);                    // vy
+                target_vertices_.push_back(-width / 2.0f + width * j / (float)width);    // vz
 
                 texture.push_back(r);
                 texture.push_back(g);
@@ -75,52 +102,25 @@ namespace glcpp
             }
         }
         set_texture(texture);
+        if (is_updated)
+        {
+            init_indices();
+            init_buffers();
+        }
     }
 
-    void Heightmap::set_target(const char *path)
-    {
-        stbi_set_flip_vertically_on_load(true);
-        unsigned char *data = stbi_load(path, &width_, &height_, &nr_channels_, 0);
-        std::cout << "channel: " << nr_channels_ << "\n";
-        if (data)
-        {
-            std::cout << "Loaded heightmap of size " << height_ << " x " << width_ << std::endl;
-        }
-        else
-        {
-            std::cout << "Failed to load texture" << std::endl;
-        }
-
-        // set up vertex data (and buffer(s)) and configure vertex attributes
-        // ------------------------------------------------------------------
-        target_vertices_.clear();
-        float yScale = (64.0f / 256.0f), yShift = 16.0f;
-        unsigned bytePerPixel = nr_channels_;
-        for (int i = 0; i < height_; i++)
-        {
-            for (int j = 0; j < width_; j++)
-            {
-                unsigned char *pixelOffset = data + (j + width_ * i) * bytePerPixel;
-                unsigned char y = pixelOffset[0];
-
-                // vertex
-                target_vertices_.push_back(-height_ / 2.0f + height_ * i / (float)height_); // vx
-                target_vertices_.push_back((int)y * yScale - yShift);                       // vy
-                target_vertices_.push_back(-width_ / 2.0f + width_ * j / (float)width_);    // vz
-            }
-        }
-        std::cout << "Loaded " << current_vertices_.size() / 3 << " current_vertices_" << std::endl;
-        stbi_image_free(data);
-    }
     void Heightmap::update_vert(float y_factor)
     {
+        std::vector<float> new_v = current_vertices_;
         for (int i = 0; i < current_vertices_.size(); i += 3)
         {
             int idx = i + 1;
-            current_vertices_[idx] = (1 - y_factor) * current_vertices_[idx] + y_factor * target_vertices_[idx];
+            new_v[idx] = (1 - y_factor) * current_vertices_[idx] + y_factor * target_vertices_[idx];
+            // current_vertices_[idx] = (1 - y_factor) * current_vertices_[idx] + y_factor * target_vertices_[idx];
         }
         glBindBuffer(GL_ARRAY_BUFFER, terrain_VBO_);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, current_vertices_.size() * sizeof(float), &current_vertices_[0]);
+        // glBufferSubData(GL_ARRAY_BUFFER, 0, current_vertices_.size() * sizeof(float), &current_vertices_[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, new_v.size() * sizeof(float), &new_v[0]);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -203,6 +203,12 @@ namespace glcpp
     }
     void Heightmap::set_texture(std::vector<unsigned char> &tex)
     {
+        static unsigned int call_count = 0;
+        call_count++;
+        if (call_count >= 2)
+        {
+            glDeleteTextures(1, &texture_[current_texture_id_]);
+        }
         glGenTextures(1, &texture_[current_texture_id_]);
         glBindTexture(GL_TEXTURE_2D, texture_[current_texture_id_]);
 
@@ -248,7 +254,16 @@ namespace glcpp
         }
         update_vert(delta_time_);
         shader->use();
-        shader->set_int("Texture1", 0); // or with shader class
+        shader->set_int("Texture1", 0);
+        shader->set_int("Texture2", 1);
+        if (current_texture_id_ == 1u)
+        {
+            shader->set_float("factor", delta_time_);
+        }
+        else
+        {
+            shader->set_float("factor", -delta_time_);
+        }
         shader->set_bool("IsGreyScale", is_greyscale_);
         shader->set_float("yScale", y_scale_factor_);
 
