@@ -13,8 +13,10 @@ uniform float yScale;
 
 void main()
 {
-    Height = aPos.y*yScale;
+    vec3 pos = aPos;
+    pos.y = pos.y * yScale;
+    Height = pos.y;
     TexCoord = aTexCoord;
-    Position = (view * model * vec4(aPos, 1.0)).xyz;
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    Position = (view * model * vec4(pos, 1.0)).xyz;
+    gl_Position = projection * view * model * vec4(pos, 1.0);
 }
