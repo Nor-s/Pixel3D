@@ -1,8 +1,18 @@
 # **Terrain Generator**
 
+여름학기동안 진행한 프로젝트를 위한 클라이언트
+
+![](./screenshot/88900.gif)
+
 ## **TODO**
 
-## **build**
+-   Add: https://learnopengl.com/Guest-Articles/2021/Tessellation/Tessellation
+
+## **known error**
+
+-   redis 코드에서 포인터 NULL 접근 오류
+
+## **Build**
 
 -   windows: MSVC 19.33.31517.0
 -   ubunt(wsl2): gcc 9.4.0 x86_64-linux-gnu
@@ -14,6 +24,8 @@
  cmake .. -G Ninja
  Ninja
 ```
+
+-   프로그램 실행시 message_queue.py 파일을 실행시키는 하드코딩이 있으므로 주의
 
 ## **External**
 
@@ -36,6 +48,8 @@
 -   nfd(extended): https://github.com/btzy/nativefiledialog-extended
 
 -   jsoncpp: https://github.com/open-source-parsers/jsoncpp
+
+-   hiredis
 
 ## **Reference**
 
