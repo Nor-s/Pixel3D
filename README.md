@@ -11,6 +11,7 @@
 ## **known error**
 
 -   redis 코드에서 포인터 NULL 접근 오류
+-   Heightmap 이미지 사이즈 하드코딩
 
 ## **Build**
 
