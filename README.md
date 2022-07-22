@@ -2,7 +2,7 @@
 
 여름학기동안 진행한 프로젝트를 위한 클라이언트
 
-![](./screenshot/88900.gif)
+![](./screenshot/88903.gif)
 
 ## **TODO**
 
@@ -75,3 +75,4 @@
 -   skybox: https://www.cleanpng.com/free/skybox.html
     -   https://opengameart.org/content/forest-skyboxes
     -   https://www.humus.name/index.php?page=Textures
+    -   https://github.com/iamyoukou/skybox
