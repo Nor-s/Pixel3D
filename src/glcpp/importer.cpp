@@ -89,8 +89,6 @@ namespace glcpp
                        aiProcess_CalcTangentSpace |
                        aiProcess_LimitBoneWeights |
                        aiProcess_JoinIdenticalVertices;
-        aiProcess_FlipWindingOrder |
-            aiProcess_SortByPType;
     }
     std::shared_ptr<glcpp::Model> Importer::import_model(const aiScene *scene)
     {
