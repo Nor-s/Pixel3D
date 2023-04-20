@@ -7,8 +7,7 @@
 -   Fix [#6](https://github.com/Nor-s/Pixel3D/issues/6)
 -   model picking
 -   visualize bone
--   z oder (grid <-> model)
--   mp2mm: increased accuracy
+
 
 ## **build**
 
