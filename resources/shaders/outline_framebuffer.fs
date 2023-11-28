@@ -34,7 +34,6 @@ void main()
         for (int n = 0; n < 3; ++n) {
             uv_y = (TexCoords.y * size.y) + (outline_thickness * float(n - 1.));
             h_sum = 0.0;
-            //texelfetch : 정규화 되지 않은 좌표를 사용. texel(최소 그래픽 구성요소)에 직접 접근
             h_sum += texelFetch(screenTexture, ivec2(uv_x - outline_thickness, uv_y), 0).a;
             h_sum += texelFetch(screenTexture, ivec2(uv_x, uv_y), 0).a;
             h_sum += texelFetch(screenTexture, ivec2(uv_x + outline_thickness, uv_y), 0).a;
